@@ -91,27 +91,33 @@ begin
     wait for 5*( 1 sec / CLK_FRQ);
     ROT_C <= '1', '0' after 2*( 1 sec / CLK_FRQ),
                   '1' after 5*( 1 sec / CLK_FRQ),
-                  '0' after 7*( 1 sec / CLK_FRQ);  -- bouncing
-    -- check display of operand A in result format
+                  '0' after 7*( 1 sec / CLK_FRQ),
+						'1' after 9*( 1 sec / CLK_FRQ);  -- bouncing
+    -- wait for blank time to expire
+    wait for 7500*( 1 sec / CLK_FRQ);      -- 5000 clock cycles (100 ms)
+	 -- check display of operand A in result format
     wait for 50*( 1 sec / CLK_FRQ);
     assert LED(7 downto 0) = std_logic_vector(to_signed(8*opA_add,8))
-      report "ERROR: Operand A not displayed correctly!" severity failure;    
-    -- wait for blank time to expire
-    wait for 5000*( 1 sec / CLK_FRQ);      -- 5000 clock cycles (100 ms)
+      report "ERROR: Operand A_add not displayed correctly!" severity failure;    
+    ROT_C <= '0';
     -- provide 2. operand
-    wait for 50*( 1 sec / CLK_FRQ);
+    wait for 7500*( 1 sec / CLK_FRQ);
     SW <= std_logic_vector(to_signed(opB_add,4));
     wait for 20*( 1 sec / CLK_FRQ);
-    ROT_C <= '1', '0' after 20*( 1 sec / CLK_FRQ);
+    ROT_C <= '1', '0' after 7500*( 1 sec / CLK_FRQ);
     -- check display of operand B in result format
-    wait for 50*( 1 sec / CLK_FRQ);
+    wait for 7550*( 1 sec / CLK_FRQ);
     assert LED(7 downto 0) = std_logic_vector(to_signed(2*opB_add,8))
-      report "ERROR: Operand B not displayed correctly!" severity failure;    
+      report "ERROR: Operand B_add not displayed correctly!" severity failure;    
     -- select operation
     wait for 50*( 1 sec / CLK_FRQ);
     BTN_WEST <= '1', '0' after 2*( 1 sec / CLK_FRQ),
                      '1' after 5*( 1 sec / CLK_FRQ),
-                     '0' after 7*( 1 sec / CLK_FRQ);  -- bouncing
+                     '0' after 7*( 1 sec / CLK_FRQ),
+							'1' after 9*( 1 sec / CLK_FRQ);  -- bouncing
+	 -- wait for blank time to expire
+    wait for 7500*( 1 sec / CLK_FRQ);      -- 5000 clock cycles (100 ms)
+	 BTN_WEST <= '0';
     -- check result of operation
     wait for 5 *( 1 sec / CLK_FRQ);
     assert LED = std_logic_vector(to_signed(2*(4*opA_add+opB_add),8))
@@ -130,11 +136,43 @@ begin
     ---------------------------------------------------------------------------
     -- test Subtraction
     ---------------------------------------------------------------------------
-
-    
-**** ToDo ****
-
-  
+	-- provide 1. operand
+    wait for 5*( 1 sec / CLK_FRQ);
+    SW <= std_logic_vector(to_signed(opA_sub,4));
+    wait for 5*( 1 sec / CLK_FRQ);
+    ROT_C <= '1', '0' after 2*( 1 sec / CLK_FRQ),
+                  '1' after 5*( 1 sec / CLK_FRQ),
+                  '0' after 7*( 1 sec / CLK_FRQ),
+						'1' after 9*( 1 sec / CLK_FRQ);  -- bouncing
+    -- wait for blank time to expire
+    wait for 7500*( 1 sec / CLK_FRQ);      -- 5000 clock cycles (100 ms)
+	 -- check display of operand A in result format
+    wait for 50*( 1 sec / CLK_FRQ);
+    assert LED(7 downto 0) = std_logic_vector(to_signed(8*opA_sub,8))
+      report "ERROR: Operand A_sub not displayed correctly!" severity failure;    
+    ROT_C <= '0';
+    -- provide 2. operand
+    wait for 7500*( 1 sec / CLK_FRQ);
+    SW <= std_logic_vector(to_signed(opB_sub,4));
+    wait for 20*( 1 sec / CLK_FRQ);
+    ROT_C <= '1', '0' after 7500*( 1 sec / CLK_FRQ);
+    -- check display of operand B in result format
+    wait for 7550*( 1 sec / CLK_FRQ);
+    assert LED(7 downto 0) = std_logic_vector(to_signed(2*opB_sub,8))
+      report "ERROR: Operand B_sub not displayed correctly!" severity failure;    
+    -- select operation
+    wait for 50*( 1 sec / CLK_FRQ);
+    BTN_EAST <= '1', '0' after 2*( 1 sec / CLK_FRQ),
+                     '1' after 5*( 1 sec / CLK_FRQ),
+                     '0' after 7*( 1 sec / CLK_FRQ),
+							'1' after 9*( 1 sec / CLK_FRQ);  -- bouncing
+	 -- wait for blank time to expire
+    wait for 7500*( 1 sec / CLK_FRQ);      -- 5000 clock cycles (100 ms)
+	 BTN_EAST <= '0';
+    -- check result of operation
+    wait for 5 *( 1 sec / CLK_FRQ);
+    assert LED = std_logic_vector(to_signed(2*(4*opA_sub-opB_sub),8))
+      report "ERROR: Wrong result of - operation!" severity failure;
     ---------------------------------------------------------------------------
     -- test reset
     ---------------------------------------------------------------------------
@@ -149,11 +187,43 @@ begin
     ---------------------------------------------------------------------------
     -- test Multiplication
     ---------------------------------------------------------------------------
-
-    
-**** ToDo ****
-
-
+	 -- provide 1. operand
+    wait for 5*( 1 sec / CLK_FRQ);
+    SW <= std_logic_vector(to_signed(opA_mul,4));
+    wait for 5*( 1 sec / CLK_FRQ);
+    ROT_C <= '1', '0' after 2*( 1 sec / CLK_FRQ),
+                  '1' after 5*( 1 sec / CLK_FRQ),
+                  '0' after 7*( 1 sec / CLK_FRQ),
+						'1' after 9*( 1 sec / CLK_FRQ);  -- bouncing
+    -- wait for blank time to expire
+    wait for 7500*( 1 sec / CLK_FRQ);      -- 5000 clock cycles (100 ms)
+	 -- check display of operand A in result format
+    wait for 50*( 1 sec / CLK_FRQ);
+    assert LED(7 downto 0) = std_logic_vector(to_signed(8*opA_mul,8))
+      report "ERROR: Operand A_mul not displayed correctly!" severity failure;    
+    ROT_C <= '0';
+    -- provide 2. operand
+    wait for 7500*( 1 sec / CLK_FRQ);
+    SW <= std_logic_vector(to_signed(opB_mul,4));
+    wait for 50*( 1 sec / CLK_FRQ);
+    ROT_C <= '1', '0' after 7500*( 1 sec / CLK_FRQ);
+    -- check display of operand B in result format
+    wait for 7550*( 1 sec / CLK_FRQ);
+    assert LED(7 downto 0) = std_logic_vector(to_signed(2*opB_mul,8))
+      report "ERROR: Operand B_mul not displayed correctly!" severity failure;    
+    -- select operation
+    wait for 50*( 1 sec / CLK_FRQ);
+    BTN_NORTH <= '1', '0' after 2*( 1 sec / CLK_FRQ),
+                     '1' after 5*( 1 sec / CLK_FRQ),
+                     '0' after 7*( 1 sec / CLK_FRQ),
+							'1' after 9*( 1 sec / CLK_FRQ);  -- bouncing
+	 -- wait for blank time to expire
+    wait for 7500*( 1 sec / CLK_FRQ);      -- 5000 clock cycles (100 ms)
+	 BTN_NORTH <= '0';
+    -- check result of operation
+    wait for 5 *( 1 sec / CLK_FRQ);
+    assert LED = std_logic_vector(to_signed((4*opA_mul*opB_mul)/4,8))
+      report "ERROR: Wrong result of * operation!" severity failure;
     ---------------------------------------------------------------------------
     -- end of simulation
     wait for 20*( 1 sec / CLK_FRQ);

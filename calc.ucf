@@ -7,7 +7,7 @@ NET "clk" LOC = "C9"  |IOSTANDARD = LVCMOS33;
 NET "rst" LOC = "K17" |IOSTANDARD = LVTTL |PULLDOWN ; # = BTN_SOUTH
 
 # I/O-constraints for ROT_C
-NET "ROT_C" LOC = "V16" | IOSTANDARD = LVTTL | PULLUP ;
+NET "ROT_C" LOC = "V16" | IOSTANDARD = LVTTL | PULLDOWN ;
 
 # I/O-constraints for Push Buttons
 NET "BTN_NORTH" LOC = "V4" | IOSTANDARD = LVTTL | PULLDOWN ;

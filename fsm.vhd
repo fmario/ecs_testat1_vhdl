@@ -6,7 +6,7 @@
 -- Description: (ECS Testat 1)
 -- Calculator mit FSM 
 -------------------------------------------------------------------------------
--- Total # of FFs: 88 + 8 + 3 = 99
+-- Total # of FFs: 54
 -------------------------------------------------------------------------------
 library ieee;
 use ieee.std_logic_1164.all;
@@ -14,7 +14,7 @@ use ieee.numeric_std.all;
 
 entity fsm is
    generic(
-		CLK_FRQ : integer := 50_000_000 -- 50 MHz = 0x2FAF080 (26 bits)
+		CLK_FRQ : integer := 50_000 -- 50 MHz = 0x2FAF080 (26 bits)
 		);
 	port(
 		rst 		: in  std_logic;
@@ -30,13 +30,15 @@ entity fsm is
 		go_mul	: out std_logic;
 		wa_done	: out std_logic;
 		wb_done	: out std_logic;
-		wa			: out std_logic_vector (7 downto 0);
-		wb			: out std_logic_vector (7 downto 0));
+		wa			: out std_logic_vector (3 downto 0)	:= (others => '0');
+		wb			: out std_logic_vector (3 downto 0) := (others => '0'));
 end fsm;
 
 architecture RTL of fsm is
 
-
+	-- blanking time constant
+	constant BLNK_TIME	: unsigned(22 downto 0) := to_unsigned(CLK_FRQ/8-1,23);
+	
 	-- Sync-Array
 	type t_sync_ar is array (0 to 1) of std_logic_vector(7 downto 0);
 	signal in_sync	:	t_sync_ar;
@@ -47,14 +49,17 @@ architecture RTL of fsm is
 	signal sync_mul	: std_logic;
 
 	-- Debouncing
+	signal blnk_cnt	: unsigned(22 downto 0);
 	signal debounced	: std_logic_vector(3 downto 0);
 	
 	-- FSM-State
-	type state is (s_init, s_op_a, s_op_b, s_done);
+	type state is (s_init, s_release, s_op_a, s_op_b, s_done);
 	signal c_st, n_st : state;
   
 begin
 
+	----------------------------------------------------------------------------- 
+	-- sequential process: Synchronisation
 	p_sync: process (rst, clk)
 	begin
 		if rst = '1' then
@@ -68,10 +73,15 @@ begin
 		end if;
 	end process;
 	
+	sync_enter 	<= in_sync(1)(0);
+	sync_add 	<= in_sync(1)(1);
+	sync_sub		<= in_sync(1)(2);
+	sync_mul		<= in_sync(1)(3);
+	sync_sw		<= in_sync(1)(7 downto 4);
 	
 	-----------------------------------------------------------------------------
 	-- FSM: Mealy-type
-	-- Inputs : db_enter, db_sub, db_add, db_mul
+	-- Inputs : sync_enter, sync_sub, sync_add, sync_mul, sync_sw
 	-- Outputs: wa, wa_done, wb, wb_done, go_add, go_sub, go_mul
 	-----------------------------------------------------------------------------
 	-- memoryless process
@@ -84,20 +94,22 @@ begin
 		go_mul 	<= '0'; 
 		wa_done <= '0'; 
 		wb_done <= '0'; 
-		wa	<= (others => '0');
-		wa	<= (others => '0');
 
 		-- specific assignments
 		case c_st is
 			when s_init =>
 				if sync_enter = '1' then
-					wa <= sync_sw(3) & sync_sw & "000";
+					wa <= sync_sw; -- store operand A
 					wa_done <= '1';
+					n_st <= s_release;
+				end if;
+			when s_release =>
+				if sync_enter = '0' then
 					n_st <= s_op_a;
 				end if;
 			when s_op_a =>
 				if sync_enter = '1' then
-					wb <= sync_sw(3) & sync_sw(3) & sync_sw(3) & sync_sw & '0';
+					wb <= sync_sw; -- store operand B
 					wb_done <= '1';
 					n_st <= s_op_b;
 				end if;
@@ -121,8 +133,7 @@ begin
 	----------------------------------------------------------------------------- 
 
 	----------------------------------------------------------------------------- 
-	-- sequential process
-	-- # of FFs: 2 (assuming binary state encoding)
+	-- sequential process: State controll
 	p_fsm_seq: process(rst, clk)
 	begin
 	 if rst = '1' then
@@ -132,22 +143,26 @@ begin
 	 end if;
 	end process;
 	
-	
+	----------------------------------------------------------------------------- 
+	-- sequential process: Debouncing
 	p_blank_cnt: process(rst, clk)
 	begin
 		if rst = '1' then
-			blnk_cnt <= '0';
+			blnk_cnt <= (others => '0');
+			debounced <= (others => '0');
 		elsif rising_edge(clk) then
 			if blnk_cnt < BLNK_TIME then
 				blnk_cnt <= blnk_cnt + 1;
 			else
-				blnk_cnt <= '0';
+				--store inputs only all CLK_FRQ/8 times
+				blnk_cnt <= (others => '0');
 				debounced(0) <= enter;
 				debounced(1) <= add;
 				debounced(2) <= sub;
 				debounced(3) <= mul;				
-		end if
+			end if;
+		end if;
 	end process;
+	----------------------------------------------------------------------------- 
 
 end RTL;
-

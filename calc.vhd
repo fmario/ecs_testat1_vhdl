@@ -6,7 +6,7 @@
 -- Description: (ECS Testat 1)
 -- Calculator mit FSM 
 -------------------------------------------------------------------------------
--- Total # of FFs: ?? + 8 + 8 = 16
+-- Total # of FFs: 54 + 9 + 8 = 71
 -------------------------------------------------------------------------------
 library ieee;
 use ieee.std_logic_1164.all;
@@ -45,8 +45,8 @@ architecture struct of calc is
 		go_mul	: out std_logic;
 		wa_done	: out std_logic;
 		wb_done	: out std_logic;
-		wa			: out std_logic_vector (7 downto 0);
-		wb			: out std_logic_vector (7 downto 0));
+		wa			: out std_logic_vector (3 downto 0);
+		wb			: out std_logic_vector (3 downto 0));
 	end component fsm;
 	
 	component clc is
@@ -56,8 +56,8 @@ architecture struct of calc is
 		add		: in	std_logic;
 		sub		: in	std_logic;
 		mul		: in	std_logic;
-		wa			: in 	std_logic_vector (7 downto 0);
-		wb			: in 	std_logic_vector (7 downto 0);
+		wa			: in 	std_logic_vector (3 downto 0);
+		wb			: in 	std_logic_vector (3 downto 0);
 		
 		clc_done	: out	std_logic;
 		result	: out std_logic_vector (7 downto 0));
@@ -70,8 +70,8 @@ architecture struct of calc is
 		wa_done 	: in  std_logic;
 		wb_done	: in  std_logic;
 		clc_done : in  std_logic;
-		wa 		: in  std_logic_vector (7 downto 0);
-		wb 		: in  std_logic_vector (7 downto 0);
+		wa 		: in  std_logic_vector (3 downto 0);
+		wb 		: in  std_logic_vector (3 downto 0);
 		result 	: in  std_logic_vector (7 downto 0);
 		
 		led_out 	: out  std_logic_vector (7 downto 0));
@@ -84,14 +84,15 @@ architecture struct of calc is
 	signal WA_DONE : std_logic;
 	signal WB_DONE : std_logic;
 	signal CLC_DONE: std_logic;
-	signal WA		: std_logic_vector (7 downto 0);
-	signal WB		: std_logic_vector (7 downto 0);
+	signal WA		: std_logic_vector (3 downto 0);
+	signal WB		: std_logic_vector (3 downto 0);
 	signal RESULT	: std_logic_vector (7 downto 0);
 
 begin
 	
 	F1:fsm
 	port map(
+		--inputs
 		rst	=>	rst,
 		clk	=> clk,
 		enter	=> ROT_C,
@@ -99,17 +100,19 @@ begin
 		sub	=> BTN_EAST,
 		mul	=> BTN_NORTH,
 		sw		=> SW,
+		--outputs
 		go_add	=> GO_ADD,
 		go_sub	=> GO_SUB,
 		go_mul	=> GO_MUL,
 		wa_done	=> WA_DONE,
 		wb_done	=> WB_DONE,
-		wa		=> WA,
-		wb		=> WB		
+		wa			=> WA,
+		wb			=> WB		
 	);
 	
 	C1:clc
 	port map(
+		--inputs
 		rst	=> rst,
 		clk	=> clk,
 		add	=> GO_ADD,
@@ -117,20 +120,23 @@ begin
 		mul	=> GO_MUL,
 		wa		=> WA,
 		wb		=> WB,
+		--ouputs
 		clc_done	=> CLC_DONE,
 		result	=> RESULT
 	);
 	
 	LCTRL:led_ctrl
 	port map(
-		rst	=> rst,
-		clk	=> clk,
+		--inputs
+		rst		=> rst,
+		clk		=> clk,
 		wa_done	=> WA_DONE,
 		wb_done	=> WB_DONE,
-		wa 	=> WA,
-		wb		=> WB,
+		wa 		=> WA,
+		wb			=> WB,
 		clc_done	=> CLC_DONE,
 		result  	=> RESULT,
+		--outputs
 		led_out	=> LED
 	);
 

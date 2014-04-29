@@ -6,7 +6,7 @@
 -- Description: (ECS Testat 1)
 -- Calculator mit FSM 
 -------------------------------------------------------------------------------
--- Total # of FFs: 30
+-- Total # of FFs: 9
 -------------------------------------------------------------------------------
 library ieee;
 use ieee.std_logic_1164.all;
@@ -19,8 +19,8 @@ entity clc is
 		add		: in	std_logic;
 		sub		: in	std_logic;
 		mul		: in	std_logic;
-		wa			: in 	std_logic_vector (7 downto 0);
-		wb			: in 	std_logic_vector (7 downto 0);
+		wa			: in 	std_logic_vector (3 downto 0);
+		wb			: in 	std_logic_vector (3 downto 0);
 		
 		clc_done	: out	std_logic;
 		result	: out std_logic_vector (7 downto 0));
@@ -33,7 +33,6 @@ architecture RTL of clc is
 begin
 	-----------------------------------------------------------------------------
 	-- sequential process: Calculation
-	-- # of FFs: 30
 	p_clc: process(rst, clk)
 		variable op_a :	signed(7 downto 0);
 		variable op_b :	signed(7 downto 0);
@@ -41,9 +40,10 @@ begin
 	begin
 	 if rst = '1' then
 		result <= (others => '0');
+		clc_done <= '0';
 	 elsif rising_edge(clk) then
-		op_a := signed(wa);
-		op_b := signed(wb);
+		op_a := signed(wa(3) & wa & "000");
+		op_b := signed(wb(3) & wb(3) & wb(3) & wb & '0');
 		if add = '1' then
 		  result <= std_logic_vector(op_a + op_b);
 		  clc_done <= '1';
@@ -57,6 +57,5 @@ begin
 		end if;
 	 end if;
 	end process;
-
+	-----------------------------------------------------------------------------
 end RTL;
-
