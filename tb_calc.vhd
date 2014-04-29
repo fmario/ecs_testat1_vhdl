@@ -1,7 +1,7 @@
 -------------------------------------------------------------------------------
 -- Entity: Tb_Calc
--- Author: Waj
--- Date  : 15-May-11, 13-May-12, 14-Apr-2013, 14-Apr-2014
+-- Author: Felder Mario
+-- Date  : 29. April 2014
 -------------------------------------------------------------------------------
 -- Description: (ECS Uebung 7)
 -- Testbench for "Taschenrechner".

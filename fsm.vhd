@@ -14,24 +14,23 @@ use ieee.numeric_std.all;
 
 entity fsm is
    generic(
-		CLK_FRQ : integer := 50_000 -- 50 MHz = 0x2FAF080 (26 bits)
+		CLK_FRQ : integer := 50_000_000 -- 50 MHz = 0x2FAF080 (26 bits)
 		);
 	port(
-		rst 		: in  std_logic;
-      clk 		: in  std_logic;
-		enter		: in	std_logic;
+		rst 	: in  std_logic;
+		clk 	: in  std_logic;
+		enter	: in	std_logic;
 		add		: in	std_logic;
 		sub		: in	std_logic;
 		mul		: in	std_logic;
-		sw			: in	std_logic_vector (3 downto 0);
+		sw		: in	std_logic_vector (3 downto 0);
 		
 		go_add	: out std_logic;
 		go_sub	: out std_logic;
 		go_mul	: out std_logic;
 		wa_done	: out std_logic;
 		wb_done	: out std_logic;
-		wa			: out std_logic_vector (3 downto 0)	:= (others => '0');
-		wb			: out std_logic_vector (3 downto 0) := (others => '0'));
+		op		: out std_logic_vector (3 downto 0) := (others => '0'));
 end fsm;
 
 architecture RTL of fsm is
@@ -41,15 +40,15 @@ architecture RTL of fsm is
 	
 	-- Sync-Array
 	type t_sync_ar is array (0 to 1) of std_logic_vector(7 downto 0);
-	signal in_sync	:	t_sync_ar;
-	signal sync_sw	:	std_logic_vector(3 downto 0);
+	signal in_sync		:	t_sync_ar;
+	signal sync_sw		:	std_logic_vector(3 downto 0);
 	signal sync_enter	: std_logic;
-	signal sync_add	: std_logic;
-	signal sync_sub	: std_logic;
-	signal sync_mul	: std_logic;
+	signal sync_add		: std_logic;
+	signal sync_sub		: std_logic;
+	signal sync_mul		: std_logic;
 
 	-- Debouncing
-	signal blnk_cnt	: unsigned(22 downto 0);
+	signal blnk_cnt		: unsigned(22 downto 0);
 	signal debounced	: std_logic_vector(3 downto 0);
 	
 	-- FSM-State
@@ -75,8 +74,8 @@ begin
 	
 	sync_enter 	<= in_sync(1)(0);
 	sync_add 	<= in_sync(1)(1);
-	sync_sub		<= in_sync(1)(2);
-	sync_mul		<= in_sync(1)(3);
+	sync_sub	<= in_sync(1)(2);
+	sync_mul	<= in_sync(1)(3);
 	sync_sw		<= in_sync(1)(7 downto 4);
 	
 	-----------------------------------------------------------------------------
@@ -94,12 +93,13 @@ begin
 		go_mul 	<= '0'; 
 		wa_done <= '0'; 
 		wb_done <= '0'; 
-
+		op <= (others => '0');
+		
 		-- specific assignments
 		case c_st is
 			when s_init =>
 				if sync_enter = '1' then
-					wa <= sync_sw; -- store operand A
+					op <= sync_sw; -- store operand A
 					wa_done <= '1';
 					n_st <= s_release;
 				end if;
@@ -109,7 +109,7 @@ begin
 				end if;
 			when s_op_a =>
 				if sync_enter = '1' then
-					wb <= sync_sw; -- store operand B
+					op <= sync_sw; -- store operand B
 					wb_done <= '1';
 					n_st <= s_op_b;
 				end if;

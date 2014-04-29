@@ -17,11 +17,10 @@ entity led_ctrl is
 		rst 		: in  std_logic;
 		clk 		: in  std_logic;	
 		wa_done 	: in  std_logic;
-		wb_done	: in  std_logic;
-		clc_done : in  std_logic;
-		wa 		: in  std_logic_vector (3 downto 0);
-		wb 		: in  std_logic_vector (3 downto 0);
-		result 	: in  std_logic_vector (7 downto 0);
+		wb_done		: in  std_logic;
+		clc_done 	: in  std_logic;
+		op 			: in  std_logic_vector (3 downto 0);
+		result 		: in  std_logic_vector (7 downto 0);
 		
 		led_out 	: out  std_logic_vector (7 downto 0));
 end led_ctrl;
@@ -39,9 +38,9 @@ begin
 			if clc_done = '1' then
 				led_out <= result;
 			elsif wb_done = '1' then
-			  led_out <= wb(3) & wb(3) & wb(3) & wb & '0';
+			  led_out <= op(3) & op(3) & op(3) & op & '0';
 			elsif wa_done = '1' then
-			  led_out <= wa(3) & wa & "000";
+			  led_out <= op(3) & op & "000";
 			end if;
 		end if;
 	end process;

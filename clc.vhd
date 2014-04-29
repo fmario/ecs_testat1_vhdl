@@ -19,24 +19,41 @@ entity clc is
 		add		: in	std_logic;
 		sub		: in	std_logic;
 		mul		: in	std_logic;
-		wa			: in 	std_logic_vector (3 downto 0);
-		wb			: in 	std_logic_vector (3 downto 0);
+		wa_done	: in 	std_logic;
+		wb_done	: in	std_logic;
+		op		: in 	std_logic_vector (3 downto 0);
 		
-		clc_done	: out	std_logic;
+		clc_done: out	std_logic;
 		result	: out std_logic_vector (7 downto 0));
 end clc;
 
 architecture RTL of clc is
 
+	signal wa	: std_logic_vector (3 downto 0);
+	signal wb	: std_logic_vector (3 downto 0);
 	
 
 begin
+	
+	-----------------------------------------------------------------------------
+	-- sequential process: Get operand
+	p_get_op: process(clk, op)
+	begin
+		if rising_edge(clk) then
+			if wb_done = '1' then
+				wb <= op;
+			elsif wa_done = '1' then
+				wa <= op;
+			end if;	
+		end if;
+	end process;
+
 	-----------------------------------------------------------------------------
 	-- sequential process: Calculation
 	p_clc: process(rst, clk)
 		variable op_a :	signed(7 downto 0);
 		variable op_b :	signed(7 downto 0);
-		variable res  : 	signed(15 downto 0);
+		variable res  : signed(15 downto 0);
 	begin
 	 if rst = '1' then
 		result <= (others => '0');
