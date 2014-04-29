@@ -1,0 +1,17 @@
+*.cmd_log
+*.log
+*.html
+*.gise
+*.lso
+*.ngc
+*.ngr
+*.prj
+*.syr
+*.tcl
+*.xise
+*.xml
+*.xrpt
+*.xst
+*xst/*
+*_xmsgs/*
+*iseconfig/*
