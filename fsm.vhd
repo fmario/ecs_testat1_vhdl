@@ -6,7 +6,7 @@
 -- Description: (ECS Testat 1)
 -- Calculator mit FSM 
 -------------------------------------------------------------------------------
--- Total # of FFs: 54
+-- Total # of FFs: 16 + 27 + 3 = 46
 -------------------------------------------------------------------------------
 library ieee;
 use ieee.std_logic_1164.all;
@@ -17,13 +17,13 @@ entity fsm is
 		CLK_FRQ : integer := 50_000_000 -- 50 MHz = 0x2FAF080 (26 bits)
 		);
 	port(
-		rst 	: in  std_logic;
-		clk 	: in  std_logic;
-		enter	: in	std_logic;
-		add		: in	std_logic;
-		sub		: in	std_logic;
-		mul		: in	std_logic;
-		sw		: in	std_logic_vector (3 downto 0);
+		rst		: in std_logic;
+		clk		: in std_logic;
+		enter	: in std_logic;
+		add		: in std_logic;
+		sub		: in std_logic;
+		mul		: in std_logic;
+		sw		: in std_logic_vector (3 downto 0);
 		
 		go_add	: out std_logic;
 		go_sub	: out std_logic;
@@ -40,8 +40,8 @@ architecture RTL of fsm is
 	
 	-- Sync-Array
 	type t_sync_ar is array (0 to 1) of std_logic_vector(7 downto 0);
-	signal in_sync		:	t_sync_ar;
-	signal sync_sw		:	std_logic_vector(3 downto 0);
+	signal in_sync		: t_sync_ar;
+	signal sync_sw		: std_logic_vector(3 downto 0);
 	signal sync_enter	: std_logic;
 	signal sync_add		: std_logic;
 	signal sync_sub		: std_logic;
@@ -59,6 +59,7 @@ begin
 
 	----------------------------------------------------------------------------- 
 	-- sequential process: Synchronisation
+	-- # of FFs: 16
 	p_sync: process (rst, clk)
 	begin
 		if rst = '1' then
@@ -71,13 +72,13 @@ begin
 			in_sync(1) <= in_sync(0);
 		end if;
 	end process;
-	
+
 	sync_enter 	<= in_sync(1)(0);
 	sync_add 	<= in_sync(1)(1);
 	sync_sub	<= in_sync(1)(2);
 	sync_mul	<= in_sync(1)(3);
 	sync_sw		<= in_sync(1)(7 downto 4);
-	
+
 	-----------------------------------------------------------------------------
 	-- FSM: Mealy-type
 	-- Inputs : sync_enter, sync_sub, sync_add, sync_mul, sync_sw
@@ -94,7 +95,7 @@ begin
 		wa_done <= '0'; 
 		wb_done <= '0'; 
 		op <= (others => '0');
-		
+
 		-- specific assignments
 		case c_st is
 			when s_init =>
@@ -123,17 +124,18 @@ begin
 				elsif sync_mul = '1' then
 					go_mul <= '1';
 					n_st <= s_done;
-				end if;			
+				end if;
 			when s_done =>
-			  null;           -- need reset to leave this state
+				null;           -- need reset to leave this state
 			when others =>
-			  n_st <= s_done; -- handle parasitic states
+				n_st <= s_done; -- handle parasitic states
 		end case;
 	end process;
 	----------------------------------------------------------------------------- 
 
 	----------------------------------------------------------------------------- 
 	-- sequential process: State controll
+	-- # of FFs: 3
 	p_fsm_seq: process(rst, clk)
 	begin
 	 if rst = '1' then
@@ -145,6 +147,7 @@ begin
 	
 	----------------------------------------------------------------------------- 
 	-- sequential process: Debouncing
+	-- # of FFs: 23 + 4 = 27
 	p_blank_cnt: process(rst, clk)
 	begin
 		if rst = '1' then
@@ -159,7 +162,7 @@ begin
 				debounced(0) <= enter;
 				debounced(1) <= add;
 				debounced(2) <= sub;
-				debounced(3) <= mul;				
+				debounced(3) <= mul;
 			end if;
 		end if;
 	end process;
