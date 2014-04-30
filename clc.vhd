@@ -37,9 +37,12 @@ begin
 	-----------------------------------------------------------------------------
 	-- sequential process: Get operand
 	-- # of FFs: 4 + 4 = 8
-	p_get_op: process(clk, op)
+	p_get_op: process(rst, clk)
 	begin
-		if rising_edge(clk) then
+		if rst = '1' then
+			wa <= (others => '0');
+			wb <= (others => '0');
+		elsif rising_edge(clk) then
 			if wb_done = '1' then
 				wb <= op;
 			elsif wa_done = '1' then
