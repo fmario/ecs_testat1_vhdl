@@ -31,6 +31,8 @@ end calc;
 architecture struct of calc is
 
 	component fsm is
+	generic(
+		CLK_FRQ : integer := CLK_FRQ);
 	port(
 		rst		: in std_logic;
 		clk		: in std_logic;
