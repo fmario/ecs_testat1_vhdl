@@ -222,7 +222,7 @@ begin
 	 BTN_NORTH <= '0';
     -- check result of operation
     wait for 5 *( 1 sec / CLK_FRQ);
-    assert LED = std_logic_vector(to_signed((4*opA_mul*opB_mul)/4,8))
+    assert LED = std_logic_vector(to_signed((opA_mul*opB_mul),8))
       report "ERROR: Wrong result of * operation!" severity failure;
     ---------------------------------------------------------------------------
     -- end of simulation
